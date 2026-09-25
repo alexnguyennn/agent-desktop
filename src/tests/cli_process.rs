@@ -41,7 +41,10 @@ fn version_has_exact_package_identity() {
 
     assert!(output.status.success());
     assert_eq!(envelope["ok"], true);
-    assert_eq!(envelope["data"]["version"], env!("CARGO_PKG_VERSION"));
+    assert_eq!(
+        envelope["data"]["version"],
+        agent_desktop_core::BUILD_VERSION
+    );
 }
 
 #[test]

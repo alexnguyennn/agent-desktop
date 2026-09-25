@@ -47,7 +47,10 @@
 - Load `.envrc`/ignored `private.env` with direnv, or export
   `AGENT_DESKTOP_INSTALL_PATH`; check that it is the intended CLI path.
   Run `just install-local` and verify `command -v agent-desktop`, the installed
-  file, and `agent-desktop --version`.
+  file, and `agent-desktop --version`. With `AGENT_DESKTOP_LOCAL_BUILD=1`,
+  require `+local.<HEAD-short-SHA>` in `--version`, `version`, and `status`;
+  a `.dirty` suffix means uncommitted source was included. Compare the built
+  and installed binary hashes before claiming that the local iteration landed.
 - Run `agent-desktop permissions` and inspect Accessibility, Screen Recording,
   and Automation states. Run `agent-desktop permissions --request` when a
   required grant is missing; ask the user via the question tool to approve in

@@ -1,5 +1,11 @@
 #![cfg_attr(not(test), deny(clippy::unwrap_used, clippy::expect_used))]
 
+/// Release version unless the local install task embeds a checkout identity.
+pub const BUILD_VERSION: &str = match option_env!("AGENT_DESKTOP_BUILD_VERSION") {
+    Some(version) => version,
+    None => env!("CARGO_PKG_VERSION"),
+};
+
 mod accname;
 pub mod action;
 pub mod action_request;
