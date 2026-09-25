@@ -478,6 +478,29 @@ cargo test --lib --workspace              # run tests
 cargo clippy --all-targets -- -D warnings # lint (must pass with zero warnings)
 ```
 
+### Use a locally built binary
+
+To make iterations in this checkout available through a stable local command,
+set `AGENT_DESKTOP_INSTALL_PATH` in an untracked `private.env` file at the repo
+root. For example:
+
+```dotenv
+AGENT_DESKTOP_INSTALL_PATH="$HOME/.local/bin/agent-desktop"
+```
+
+The committed `.envrc` loads `private.env` with direnv. Run `direnv allow` once
+after checkout or whenever `.envrc` changes, then use:
+
+```bash
+just install-local
+```
+
+The `just` recipe builds the release CLI and installs it at the configured path;
+`agent-desktop --version` then reports the locally built version. The install
+path is never committed. If direnv is unavailable, export
+`AGENT_DESKTOP_INSTALL_PATH` in the shell before running the recipe. It fails
+rather than choosing or overwriting an implicit destination.
+
 ## FAQ
 
 See the [complete FAQ](docs/faq.md) for architecture, platform support, installation, refs, licensing, and support links.
