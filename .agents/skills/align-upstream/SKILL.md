@@ -17,10 +17,12 @@ use the bundled `skills/agent-desktop/SKILL.md` instead.
 before changing refs. Check cleanliness, remotes, upstream tips, branch graph,
 and install destination; preserve unrelated changes.
 
-**Align:** Fast-forward local `main` from `upstream/main`, update fork `origin/main`,
-then rebase each local branch in stack order onto its new parent. Record old and
-new hashes; use `--force-with-lease` only for branches already published and
-only after verifying their remote tips. Never force-push `main` or `upstream`.
+**Align:** Record actual local branch dependencies as symbolic Git refs and
+capture pre-sync tips before moving anything. Fast-forward local `main` from
+`upstream/main`, update fork `origin/main`, then move independent branches and
+stacks in parent-before-child order. Use `--force-with-lease` only for
+published branches after verifying their remote tips. Never force-push `main`
+or `upstream`.
 
 **Verify:** Run owning tests, `just install-local` using the environment-selected
 destination, permissions and core AX smoke per the reference. Consult the
@@ -29,8 +31,9 @@ If permissions need interactive approval, run `permissions --request` and ask
 the user to confirm the OS grant via the question tool before rechecking.
 Record observable pass/fail, not a claimed UI pass from a mere successful exit.
 
-**Success:** Fork `main` equals upstream, local branches preserve their changes
-on the new base, the installed executable is from the rebased HEAD, and
+**Success:** Fork `main` equals upstream, every affected local branch preserves
+its changes on the new base, dependency refs still point to the intended local
+parents, the installed executable is from the rebased HEAD, and
 permissions plus a real snapshot have been checked. Report hashes, pushes,
 install path, smoke evidence, and any unresolved permission gate.
 
