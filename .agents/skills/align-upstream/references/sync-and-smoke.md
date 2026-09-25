@@ -10,10 +10,30 @@
 - Fetch both remotes. Record current hashes for `main`, the local branches,
   `origin/main`, and any published feature refs. If fork main diverged from
   upstream, stop and reconcile it rather than replacing commits.
+- Enumerate **all affected local branches**, including branches not checked
+  out, and inspect ancestry plus `refs/align-upstream/deps/`. For each genuine
+  child branch, record its parent by ref name, not an old SHA:
+  `git symbolic-ref refs/align-upstream/deps/<child> refs/heads/<parent>`.
+  These are local symbolic refs; do not push them. Validate each target exists,
+  the child actually descends from the parent, and the graph has no cycle.
+  Equivalent trees on divergent sibling branches are **not** a stack; keep
+  them independent unless a real dependency is established.
+- Before moving any branch, save its old tip with
+  `git update-ref refs/align-upstream/pre-sync/<branch> refs/heads/<branch>`
+  (including `main`). Confirm each saved SHA and keep it until the sync is
+  verified; check before overwriting a previous recovery ref. Save published
+  remote tip hashes separately for the push leases.
 - Fast-forward local `main` from `upstream/main`; push it to `origin/main`
-  normally. Rebase the bottom feature branch onto `main`, then each child
-  onto its updated parent using `git rebase --onto <new-parent> <old-parent>`.
-  Check `git range-diff`/diff and tests after conflict resolution.
+  normally. For each independent branch, compute its actual old fork point
+  against `refs/align-upstream/pre-sync/main` and run
+  `git rebase --onto main <old-fork-point> <branch>`. Move every stacked child
+  after its parent: compute its old fork point against
+  `refs/align-upstream/pre-sync/<parent>` and run
+  `git rebase --onto <parent> <old-fork-point> <child>`. Inspect merge bases
+  before choosing them, especially for branches cut before the last sync;
+  blindly using the saved parent tip can drop commits. Symbolic dependency
+  refs continue following moved parents. Check `git range-diff`/diff and tests
+  after conflict resolution.
 - Push rebased published feature branches in dependency order with explicit
   `--force-with-lease=refs/heads/<branch>:<recorded-remote-hash>` to `origin`.
   A changed remote tip means stop, fetch, and investigate; never disable hooks.
