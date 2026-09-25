@@ -128,7 +128,9 @@ pub(super) fn records_from_dictionaries(
     let mut records = Vec::new();
     for dictionary in dictionaries {
         let layer = required_int_field(&dictionary, "kCGWindowLayer")?;
-        if layer != 0 {
+        // AppKit's NSFloatingWindowLevel is 3. Overlay applications use it
+        // for AX-backed content; excluding it can select a hidden helper.
+        if !matches!(layer, 0 | 3) {
             continue;
         }
         let pid = i32::try_from(required_int_field(&dictionary, "kCGWindowOwnerPID")?)
