@@ -486,6 +486,7 @@ root. For example:
 
 ```dotenv
 AGENT_DESKTOP_INSTALL_PATH="$HOME/.local/bin/agent-desktop"
+AGENT_DESKTOP_LOCAL_BUILD=1
 ```
 
 The committed `.envrc` loads `private.env` with direnv. Run `direnv allow` once
@@ -495,9 +496,12 @@ after checkout or whenever `.envrc` changes, then use:
 just install-local
 ```
 
-The `just` recipe builds the release CLI and installs it at the configured path;
-`agent-desktop --version` then reports the locally built version. The install
-path is never committed. If direnv is unavailable, export
+The `just` recipe builds the release CLI and installs it at the configured path.
+With `AGENT_DESKTOP_LOCAL_BUILD=1`, `agent-desktop --version`, `version`, and
+`status` report a build identity like `0.9.4+local.84a1e5cb1234` (or
+`+local.<sha>.dirty` for uncommitted changes). Leave the variable unset for
+the ordinary package version; no Cargo manifest or release version is changed.
+The install path is never committed. If direnv is unavailable, export
 `AGENT_DESKTOP_INSTALL_PATH` in the shell before running the recipe. It fails
 rather than choosing or overwriting an implicit destination.
 

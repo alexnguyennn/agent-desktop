@@ -78,7 +78,7 @@ fn standard_version_flag_reports_the_package_version() {
     assert_eq!(error.kind(), ErrorKind::DisplayVersion);
     assert_eq!(
         error.to_string().trim(),
-        format!("agent-desktop {}", env!("CARGO_PKG_VERSION"))
+        format!("agent-desktop {}", agent_desktop_core::BUILD_VERSION)
     );
 }
 

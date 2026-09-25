@@ -30,7 +30,7 @@ pub fn execute_with_report_with_context(
 
     let mut body = json!({
         "platform": std::env::consts::OS,
-        "version": env!("CARGO_PKG_VERSION"),
+        "version": crate::BUILD_VERSION,
         "permissions": permissions,
         "snapshot_id": snapshot_id,
         "ref_count": ref_count,
