@@ -33,6 +33,8 @@ AGENTS.md
 # Environment
 .env
 .env.*
+!.envrc
+private.env
 
 # Logs
 *.log
