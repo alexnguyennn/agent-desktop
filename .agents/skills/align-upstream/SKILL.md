@@ -1,0 +1,39 @@
+---
+name: align-upstream
+description: >-
+  Aligns this agent-desktop fork with lahfir/agent-desktop main while preserving
+  local additions, then rebuilds and verifies the installed CLI. Use for
+  "sync upstream", "align with remote", "rebase local additions", "update
+  fork main", or "rebuild agent-desktop after upstream changes".
+---
+
+# Align agent-desktop with upstream
+
+**When to use:** A local feature stack needs the latest `upstream/main`, or a
+fresh local binary must be qualified after syncing. For one-off UI automation,
+use the bundled `skills/agent-desktop/SKILL.md` instead.
+
+**Inspect:** Read [references/sync-and-smoke.md](references/sync-and-smoke.md)
+before changing refs. Check cleanliness, remotes, upstream tips, branch graph,
+and install destination; preserve unrelated changes.
+
+**Align:** Fast-forward local `main` from `upstream/main`, update fork `origin/main`,
+then rebase each local branch in stack order onto its new parent. Record old and
+new hashes; use `--force-with-lease` only for branches already published and
+only after verifying their remote tips. Never force-push `main` or `upstream`.
+
+**Verify:** Run owning tests, `just install-local` using the environment-selected
+destination, permissions and core AX smoke per the reference. Consult the
+bundled `skills/agent-desktop/SKILL.md` for current snapshot/refs semantics.
+If permissions need interactive approval, run `permissions --request` and ask
+the user to confirm the OS grant via the question tool before rechecking.
+Record observable pass/fail, not a claimed UI pass from a mere successful exit.
+
+**Success:** Fork `main` equals upstream, local branches preserve their changes
+on the new base, the installed executable is from the rebased HEAD, and
+permissions plus a real snapshot have been checked. Report hashes, pushes,
+install path, smoke evidence, and any unresolved permission gate.
+
+**Test / improve:** Exercise this workflow against a real upstream advance and
+the representative smoke. If a branch, permission, or capture assumption fails,
+update the reference with the observed correction before the next sync.
