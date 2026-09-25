@@ -31,15 +31,20 @@
 - Run `agent-desktop permissions` and inspect Accessibility, Screen Recording,
   and Automation states. Run `agent-desktop permissions --request` when a
   required grant is missing; ask the user via the question tool to approve in
-  macOS Settings if needed, then recheck. Do not claim a grant based solely on
-  the request command's return code.
+  macOS Settings if needed, then recheck. `unknown` Automation can mean the
+  requesting helper has no established TCC record; macOS may show the parent
+  terminal as the controller instead. Record it as unverified unless an actual
+  Automation-dependent operation succeeds; do not claim a grant based solely
+  on the request command's return code or a parent terminal's toggle.
 - Follow `skills/agent-desktop/SKILL.md` for observe/ref semantics. Use a
   running, non-sensitive app such as Finder: `agent-desktop list-apps`,
   `agent-desktop list-windows --app Finder`, and
   `agent-desktop snapshot --app Finder -i`. Require `ok: true`, a complete
   snapshot, and identifiable elements. If Finder has no window, open a
   disposable Finder window or choose another known app and record the target;
-  do not treat `WINDOW_NOT_FOUND` as a pass. Re-snapshot after any UI change.
+  for a dense app use `--skeleton -i --compact` and require `complete: true`.
+  Do not treat `WINDOW_NOT_FOUND` or a truncated full tree as a pass.
+  Re-snapshot after any UI change.
 - For Screen Recording, capture a visible screen/window to an ignored local
   file and inspect the PNG for actual content. For changes affecting window
   inventory/correlation, additionally snapshot the affected app/window; a
