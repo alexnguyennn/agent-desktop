@@ -9,12 +9,16 @@ description: >-
 
 # Align agent-desktop with upstream
 
+For a plain-language explanation of branch dependencies and saved pointers,
+see [README.md](README.md). The commands and verification gates live in
+[references/sync-and-smoke.md](references/sync-and-smoke.md).
+
 **When to use:** A local feature stack needs the latest `upstream/main`, or a
 fresh local binary must be qualified after syncing. For one-off UI automation,
 use the bundled `skills/agent-desktop/SKILL.md` instead.
 
-**Inspect:** Read [references/sync-and-smoke.md](references/sync-and-smoke.md)
-before changing refs. Check cleanliness, remotes, upstream tips, branch graph,
+**Inspect:** Read the sync-and-smoke reference before changing refs. Check
+cleanliness, remotes, upstream tips, branch graph,
 and install destination; preserve unrelated changes.
 
 **Align:** Record actual local branch dependencies as symbolic Git refs and
