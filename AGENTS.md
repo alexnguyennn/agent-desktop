@@ -1,5 +1,8 @@
 # Local development
 
+- For requests to update the fork from upstream, rebase local additions, or
+  rebuild after upstream changes, load `.agents/skills/align-upstream/SKILL.md`
+  and follow its linked sync-and-smoke workflow.
 - To exercise changes through a stable local CLI, set
   `AGENT_DESKTOP_INSTALL_PATH` in the ignored `private.env` at the repository
   root. `.envrc` loads that file through direnv; allow it locally with
