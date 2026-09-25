@@ -11,7 +11,7 @@ const AFTER_HELP: &str = include_str!("help_after.txt");
 #[derive(Parser, Debug)]
 #[command(
     name = "agent-desktop",
-    version,
+    version = agent_desktop_core::BUILD_VERSION,
     about = "Reliable computer use for AI agents — see and operate desktop apps",
     long_about = None,
     before_help = BEFORE_HELP,

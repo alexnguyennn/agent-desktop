@@ -219,7 +219,7 @@ fn write_meta_header_locked(
         session_id,
         json!({
             "schema": 1,
-            "version": env!("CARGO_PKG_VERSION"),
+            "version": crate::BUILD_VERSION,
             "os": std::env::consts::OS,
             "pid": std::process::id(),
             "proc_start_ms": process_start_ms(),

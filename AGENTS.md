@@ -10,6 +10,10 @@
 - Run `just install-local` to build the release CLI and install it at
   that environment-provided path. The install destination must not be hardcoded
   in task recipes or committed configuration.
+- Set `AGENT_DESKTOP_LOCAL_BUILD=1` in ignored `private.env` to embed
+  `<package-version>+local.<short-commit>` (plus `.dirty` if applicable) in
+  the installed CLI's version reports; ordinary Cargo/release builds keep the
+  package version.
 - Do not commit `private.env`; it can contain machine-specific paths or local
   credentials. The task accepts the same variable directly from the shell when
   direnv is not in use.
