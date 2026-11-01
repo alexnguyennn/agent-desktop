@@ -373,6 +373,10 @@ mod tests;
 mod records;
 use records::bridged_snapshot;
 
+#[path = "workspace_apps_surfaces.rs"]
+mod surfaces;
+pub(crate) use surfaces::window_owner_snapshot_with_surfaces_until;
+
 #[cfg(test)]
 #[path = "workspace_apps_skip_tests.rs"]
 mod skip_tests;

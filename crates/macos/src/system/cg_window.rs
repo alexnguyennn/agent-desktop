@@ -120,6 +120,13 @@ fn stabilize_records_until(
     }
 }
 
+/// AppKit's NSFloatingWindowLevel is 3. Overlay applications use it for
+/// content that is not part of the normal window level, so excluding it can
+/// select a hidden helper or miss a bar.
+pub(super) fn is_application_window_layer(layer: i64) -> bool {
+    matches!(layer, 0 | 3)
+}
+
 pub(super) fn records_from_dictionaries(
     dictionaries: Vec<WindowDictionary>,
     scope: WindowRecordScope<'_>,
@@ -127,9 +134,7 @@ pub(super) fn records_from_dictionaries(
     let mut records = Vec::new();
     for dictionary in dictionaries {
         let layer = required_int_field(&dictionary, "kCGWindowLayer")?;
-        // AppKit's NSFloatingWindowLevel is 3. Overlay applications use it
-        // for AX-backed content; excluding it can select a hidden helper.
-        if !matches!(layer, 0 | 3) {
+        if !is_application_window_layer(layer) {
             continue;
         }
         let pid = i32::try_from(required_int_field(&dictionary, "kCGWindowOwnerPID")?)
@@ -166,7 +171,7 @@ pub(super) fn records_from_dictionaries(
     Ok(records)
 }
 
-fn window_dictionaries() -> Result<Vec<WindowDictionary>, AdapterError> {
+pub(super) fn window_dictionaries() -> Result<Vec<WindowDictionary>, AdapterError> {
     use crate::cf_type::borrowed_cf_dictionary;
     use core_graphics::display::CGDisplay;
     let options = window_list_options();
@@ -323,7 +328,7 @@ fn required_string_field(dict: &WindowDictionary, key: &str) -> Result<String, A
     string_field(dict, key).ok_or_else(|| missing_field_error(key))
 }
 
-fn int_field(dict: &WindowDictionary, key: &str) -> Option<i64> {
+pub(super) fn int_field(dict: &WindowDictionary, key: &str) -> Option<i64> {
     use crate::cf_type::borrowed_cf_number;
     use core_foundation::base::TCFType;
 
@@ -333,7 +338,7 @@ fn int_field(dict: &WindowDictionary, key: &str) -> Option<i64> {
         .and_then(|number| number.to_i64())
 }
 
-fn string_field(dict: &WindowDictionary, key: &str) -> Option<String> {
+pub(super) fn string_field(dict: &WindowDictionary, key: &str) -> Option<String> {
     use crate::cf_type::borrowed_cf_string;
     use core_foundation::base::TCFType;
 
@@ -343,7 +348,7 @@ fn string_field(dict: &WindowDictionary, key: &str) -> Option<String> {
         .map(|value| value.to_string())
 }
 
-fn bool_field(dict: &WindowDictionary, key: &str) -> Result<bool, AdapterError> {
+pub(super) fn bool_field(dict: &WindowDictionary, key: &str) -> Result<bool, AdapterError> {
     use core_foundation::boolean::CFBoolean;
 
     let cf_key = CFString::new(key);

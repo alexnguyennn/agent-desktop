@@ -2,6 +2,7 @@ mod adapter;
 pub(crate) mod app_inventory;
 pub(crate) mod app_ops;
 pub(crate) mod appkit_bridge;
+pub(crate) mod cg_surface_owners;
 pub(crate) mod cg_window;
 pub(crate) mod cg_window_exact;
 pub(crate) mod cocoa_runtime;

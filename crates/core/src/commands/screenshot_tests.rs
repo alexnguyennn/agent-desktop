@@ -7,6 +7,7 @@ use crate::{
 use std::{path::PathBuf, sync::Mutex};
 
 struct ScreenshotAdapter {
+    apps: Vec<crate::AppInfo>,
     displays: Vec<DisplayInfo>,
     windows: Vec<WindowInfo>,
     target: Mutex<Option<ScreenshotTarget>>,
@@ -17,9 +18,26 @@ impl ScreenshotAdapter {
         let mut focused = window("w-42", 700);
         focused.state.is_focused = true;
         Self {
+            apps: vec![crate::AppInfo {
+                name: "Example".into(),
+                pid: crate::ProcessId::new(700),
+                bundle_id: Some("com.example.app".into()),
+                process_instance: Some("instance-700".into()),
+                presentation: None,
+            }],
             displays: vec![display("main", true, 2.0), display("secondary", false, 1.0)],
             windows: vec![window("w-41", 700), focused],
             target: Mutex::new(None),
+        }
+    }
+
+    fn window_owner_only() -> Self {
+        let mut bar = window("w-9", 900);
+        bar.app = "Bar".into();
+        Self {
+            apps: Vec::new(),
+            windows: vec![bar],
+            ..Self::new()
         }
     }
 
@@ -30,13 +48,7 @@ impl ScreenshotAdapter {
 
 impl ObservationOps for ScreenshotAdapter {
     fn list_apps(&self, _deadline: crate::Deadline) -> Result<Vec<crate::AppInfo>, AdapterError> {
-        Ok(vec![crate::AppInfo {
-            name: "Example".into(),
-            pid: crate::ProcessId::new(700),
-            bundle_id: Some("com.example.app".into()),
-            process_instance: Some("instance-700".into()),
-            presentation: None,
-        }])
+        Ok(self.apps.clone())
     }
 
     fn list_windows(
@@ -179,6 +191,69 @@ fn app_target_resolves_one_exact_focused_window() {
         }
         _ => panic!("expected exact window target"),
     }
+}
+
+#[test]
+fn window_of_a_process_missing_from_the_app_inventory_is_still_pinned_exactly() {
+    let adapter = ScreenshotAdapter::window_owner_only();
+    let mut request = args();
+    request.app = Some("Bar".into());
+    request.window_id = Some("w-9".into());
+
+    screenshot::execute(request, &adapter).expect("screenshot");
+
+    match adapter.take_target() {
+        Some(ScreenshotTarget::ExactWindow(window)) => {
+            assert_eq!(window.id, "w-9");
+            assert_eq!(window.pid, 900);
+            assert_eq!(window.process_instance.as_deref(), Some("instance-900"));
+        }
+        _ => panic!("expected exact window target"),
+    }
+}
+
+#[test]
+fn unlisted_app_without_the_requested_window_still_captures_nothing() {
+    let adapter = ScreenshotAdapter::window_owner_only();
+    let mut request = args();
+    request.app = Some("Bar".into());
+    request.window_id = Some("w-404".into());
+
+    let error = screenshot::execute(request, &adapter).expect_err("missing window");
+
+    assert_eq!(error.code(), "INVALID_ARGS");
+    assert!(adapter.take_target().is_none());
+}
+
+#[test]
+fn unlisted_app_window_with_incomplete_identity_is_refused() {
+    let mut adapter = ScreenshotAdapter::window_owner_only();
+    adapter.windows[0].process_instance = None;
+    let mut request = args();
+    request.app = Some("Bar".into());
+    request.window_id = Some("w-9".into());
+
+    let error = screenshot::execute(request, &adapter).expect_err("incomplete identity");
+
+    assert_eq!(error.code(), "ACTION_NOT_SUPPORTED");
+    assert!(adapter.take_target().is_none());
+}
+
+#[test]
+fn ambiguous_app_name_is_not_mistaken_for_an_unlisted_app() {
+    let mut adapter = ScreenshotAdapter::new();
+    let mut twin = adapter.apps[0].clone();
+    twin.pid = crate::ProcessId::new(701);
+    twin.process_instance = Some("instance-701".into());
+    adapter.apps.push(twin);
+    let mut request = args();
+    request.app = Some("Example".into());
+    request.window_id = Some("w-42".into());
+
+    let error = screenshot::execute(request, &adapter).expect_err("ambiguous app");
+
+    assert_eq!(error.code(), "AMBIGUOUS_TARGET");
+    assert!(adapter.take_target().is_none());
 }
 
 #[test]

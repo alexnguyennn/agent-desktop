@@ -50,7 +50,7 @@ fn capture_global_once(
 ) -> Result<Vec<WindowInfo>, AdapterError> {
     let mut windows = capture_global_with(
         focused_only,
-        || crate::system::workspace_apps::window_owner_snapshot_until(deadline),
+        || crate::system::workspace_apps::window_owner_snapshot_with_surfaces_until(deadline),
         |eligible_pids| {
             crate::system::cg_window::window_records_until(
                 deadline,

@@ -74,11 +74,7 @@ fn resolve_target(
     }
 
     if let Some(window_id) = &args.window_id {
-        let expected_app = args
-            .app
-            .as_deref()
-            .map(|name| crate::commands::helpers::resolve_app(Some(name), adapter, deadline))
-            .transpose()?;
+        let expected_app = expected_window_app(args.app.as_deref(), adapter, deadline)?;
         let filter = WindowFilter {
             focused_only: false,
             app: args.app.clone(),
@@ -120,6 +116,26 @@ fn resolve_target(
     }
 
     Ok(ScreenshotTarget::FullScreen)
+}
+
+/// The application inventory lists launchable applications only. A named
+/// process that owns windows without being one (a status-bar daemon) is still
+/// pinned by the exact window and process instance the window inventory
+/// reports, so an unlisted name falls through to that inventory instead of
+/// failing before it is consulted. Every other resolution failure stays fatal.
+fn expected_window_app(
+    app: Option<&str>,
+    adapter: &dyn PlatformAdapter,
+    deadline: crate::Deadline,
+) -> Result<Option<crate::AppInfo>, AppError> {
+    let Some(name) = app else {
+        return Ok(None);
+    };
+    match crate::commands::helpers::resolve_app(Some(name), adapter, deadline) {
+        Ok(app) => Ok(Some(app)),
+        Err(error) if error.code() == ErrorCode::AppNotFound.as_str() => Ok(None),
+        Err(error) => Err(error),
+    }
 }
 
 fn select_unique_window(
