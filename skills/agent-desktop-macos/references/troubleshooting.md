@@ -85,6 +85,14 @@ For Automation, open Privacy & Security > Automation and allow the launching app
 
 **Fix.** Run `agent-desktop launch "App Name"` (display name or bundle ID). Then run `list-windows --app "App"`. A full-screen app still appears in `list-windows`, but its bounds equal the screen and its state can lag behind animations, so use `wait`.
 
+## A bundle-less process with its own windows (status bars, overlays)
+
+**Symptom.** `list-apps` omits a daemon such as SketchyBar, and `snapshot --app` returns `APP_NOT_FOUND`.
+
+**Cause.** The process has no app bundle, so it is not a launchable application. It also exposes no accessibility windows.
+
+**Fix.** Run `list-windows --app "sketchybar"` with the process name (a symlinked executable reports the link's name). It lists every on-screen window the process owns, with `bounds` and `accessible: false`. Pick the window whose bounds match what you want, then run `screenshot --app "sketchybar" --window-id w-N`. There is no accessibility tree to `snapshot`.
+
 ## Notification Center
 
 | Symptom | Cause | Fix |
